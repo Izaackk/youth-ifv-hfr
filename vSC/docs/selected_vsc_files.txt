@@ -1,0 +1,14 @@
+Selected vSC files and provenance
+
+- HFR/DWI/SC_native2HFRmatrix_Parallel_withlog.sh
+  -> code/01_structural_connectome/SC_native2HFRmatrix_Parallel_withlog.sh
+  Public-release edits: placeholder paths, English comments, quoted paths, configurable subject list and parallel job count.
+
+- HFR/win10_step5_rep/05_vSC/step17_build_vsc_win10_step5.m
+  -> code/02_sliding_window/build_vsc_win20_step10.m
+  Public-release edits: window size 20, step size 10, configurable paths, local output, and bundled correlation helper.
+
+- HFR shared helper my_matcorr.m
+  -> code/utils/my_matcorr.m
+
+No files under the original HFR source directory were modified.
