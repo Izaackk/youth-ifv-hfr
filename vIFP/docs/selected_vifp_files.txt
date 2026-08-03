@@ -1,8 +1,0 @@
-# vIFP/cmpdice files selected in this step
-#
-# Rule: copied source files are kept unmodified. This list records the
-# original source path and the local review-copy destination.
-
-.../HFR/DICE/dice_HFR_group.m -> code/01_pairwise_cmpdice/dice_HFR_group.m
-.../HFR/DICE/dice_HFR_subgroup.m -> code/01_pairwise_cmpdice/dice_HFR_subgroup.m
-.../HFR/DICE/dice_slidingwindow.m -> code/02_sliding_window_vifp/dice_slidingwindow.m
