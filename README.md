@@ -16,7 +16,6 @@ GAMs/
 vIFP/
   code/01_pairwise_cmpdice/
   code/02_sliding_window_vifp/
-  docs/
 
 vSC/
   code/01_structural_connectome/

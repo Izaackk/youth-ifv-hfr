@@ -1,0 +1,32 @@
+# Generated outputs and local data
+outputs/
+repro_outputs/
+*.mat
+*.mgh
+*.gii
+*.nii
+*.nii.gz
+*.csv
+*.tsv
+*.xlsx
+*.pdf
+*.tiff
+*.tif
+*.jpg
+*.jpeg
+*.png
+
+# R session files
+.Rhistory
+.RData
+
+# OS/editor files
+.DS_Store
+
+# Module-local notes kept out of the public GitHub tree
+vIFP/README.md
+vIFP/docs/
+vSC/README.md
+vSC/docs/
+vFC/README.md
+vFC/docs/
