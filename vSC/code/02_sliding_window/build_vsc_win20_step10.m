@@ -10,8 +10,8 @@ step_size = 10;
 exclude_sids = {}; % Optional IDs to omit from the supplied subject list.
 
 script_dir = fileparts(mfilename('fullpath'));
-vsc_root = fileparts(fileparts(script_dir));
-addpath(fullfile(vsc_root, 'code', 'utils'));
+repo_root = fileparts(fileparts(fileparts(script_dir)));
+addpath(fullfile(repo_root, 'utils'));
 
 validateattributes(window_size, {'numeric'}, {'scalar', 'integer', 'finite', '>=', 2});
 validateattributes(step_size, {'numeric'}, {'scalar', 'integer', 'finite', 'positive'});

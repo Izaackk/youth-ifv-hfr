@@ -4,7 +4,16 @@ Code accompanying the manuscript:
 
 **Spatiotemporal Pattern and Structural Substrates of Individual Functional Variability in Youth**
 
-This repository provides selected analysis code used to quantify inter-individual variability in youth brain organization and to model its age-related patterns. The current public subset includes individualized functional parcellation, structural-connectome, functional-connectivity, morphometric-similarity-network, and myelin-distribution variability, together with generalized additive models.
+This repository provides selected analysis code used to quantify inter-individual variability in youth brain organization and to model its age-related patterns. The current public subset includes individualized functional parcellation, functional-connectivity, structural-connectome, morphometric-similarity-network, and myelin-distribution variability, together with generalized additive models.
+
+## Individualized Parcellation and Functional Connectivity
+
+The study used the individualized cortical network parcellation method developed by [Wang et al. (2015)](https://doi.org/10.1038/nn.4164) and the homologous functional region mapping method described by [Li et al. (2019)](https://doi.org/10.1371/journal.pbio.2007032). The authors provide the [Homologous Functional Regions toolbox (HFR_ai)](https://github.com/MeilingAva/Homologous-Functional-Regions) to identify homologous functional regions across individuals and compute functional connectivity between these individualized regions.
+
+Use HFR_ai with preprocessed functional MRI data to obtain individualized parcellations, matched ROI masks, and functional-connectivity matrices for the downstream analyses in this repository. Follow the upstream toolbox's input requirements and setup instructions. When using HFR_ai, cite both methodological papers recommended by the toolbox authors:
+
+1. Wang, D., Buckner, R. L., Fox, M. D., et al. Parcellating cortical functional networks in individuals. *Nature Neuroscience* **18**, 1853-1860 (2015). [doi:10.1038/nn.4164](https://doi.org/10.1038/nn.4164).
+2. Li, M., Wang, D., Ren, J., et al. Performing group-level functional image analyses based on homologous functional regions mapped in individuals. *PLOS Biology* **17**(3), e2007032 (2019). [doi:10.1371/journal.pbio.2007032](https://doi.org/10.1371/journal.pbio.2007032).
 
 ## Repository Contents
 
@@ -17,13 +26,12 @@ vIFP/
   code/01_pairwise_cmpdice/
   code/02_sliding_window_vifp/
 
+vFC/
+  code/
+
 vSC/
   code/01_structural_connectome/
   code/02_sliding_window/
-  code/utils/
-
-vFC/
-  code/
 
 vMSN/
   code/01_morphology_msn/
@@ -54,6 +62,12 @@ Run `dice_HFR_group.m` first. Its `vIFP/outputs/CmpDice/cmp_dice_results_new.mat
 
 The separate `All_601/dice.mat` retains legacy Dice overlap; `All_601/vifp.mat` contains its complementary vIFP measure. The subject list supplied to the pairwise builder must match the order of `All_ROI_Ind_Big`.
 
+### vFC
+
+`vFC/` contains scripts for within-subject and between-subject functional-connectivity variability based on HFR ROI-to-ROI functional-connectivity matrices. The scripts compute intra-subject variability across sessions and inter-subject variability within age-sorted sliding windows.
+
+Run the intra-subject script before the inter-subject script. Surface exports use the included `utils/save_mgh_HFR_fs5.m`; configure its `template_dir` and supply the authorized HFR87-to-116 mapping and fsaverage5 label surfaces. These templates are not distributed. An intra-subject age model uses one row per subject, not sliding-window averages; assembling its covariate table is a separate input-preparation step.
+
 ### vSC
 
 `vSC/` contains code for individualized HFR structural-connectome construction and sliding-window structural-connectome variability. For each window, ROI connectivity profiles are compared across subject pairs, and vSC is defined as:
@@ -65,12 +79,6 @@ vSC = 1 - mean pairwise connectivity-profile correlation
 The structural-connectome workflow assumes precomputed diffusion preprocessing, DWI-to-T1 transforms, and SIFT-filtered tractograms.
 
 Edit paths, window settings, and optional excluded IDs at the top of `build_vsc_win20_step10.m`. It reads 88 x 88 MAT or CSV matrices without writing to the input directory, zeroes the diagonal, and removes the first label before profile comparison. Zero-variance profile correlations are replaced with zero, matching the original calculation.
-
-### vFC
-
-`vFC/` contains scripts for within-subject and between-subject functional-connectivity variability based on HFR ROI-to-ROI functional-connectivity matrices. The scripts compute intra-subject variability across sessions and inter-subject variability within age-sorted sliding windows.
-
-Run the intra-subject script before the inter-subject script. Surface exports use the included `utils/save_mgh_HFR_fs5.m`; configure its `template_dir` and supply the authorized HFR87-to-116 mapping and fsaverage5 label surfaces. These templates are not distributed. An intra-subject age model uses one row per subject, not sliding-window averages; assembling its covariate table is a separate input-preparation step.
 
 ### vMSN
 
@@ -101,8 +109,8 @@ The two GAM scripts retain their previously published implementation. The whole-
 | Module | ROI measure | Sex covariate | Whole-brain measure |
 | --- | --- | --- | --- |
 | vIFP | `vifp.bins` | `sex.de.bins` | `wb.mean.vifp` in the same window file |
-| vSC | `var.bins` | `sex.bins` | `wb.mean` in the same window file |
 | vFC inter-subject | `var.bins` | `sex.bins` | Prepare a single-column ROI mean separately |
+| vSC | `var.bins` | `sex.bins` | `wb.mean` in the same window file |
 | vMSN | `H` or `var.all` | `sex.de.bins` or `sex.bins` | `mvar.all` in the same window file |
 | vMD | `H` | `sex.de.bins` | `H` in the separate `WB` file |
 
@@ -112,22 +120,27 @@ All window inputs also require `age.bins` and `mFD.bins`. Edit the ROI script's 
 
 ## Typical Workflow
 
-1. Compute pairwise vIFP from individualized matched ROI masks.
-2. Build age-sorted sliding-window vIFP summaries.
-3. Build individualized HFR structural-connectome matrices from tractography outputs.
-4. Compute sliding-window vSC from HFR structural-connectome matrices.
-5. Compute intra- and inter-subject vFC from HFR functional-connectivity matrices.
-6. Extract morphometric features, build MSN matrices, and compute sliding-window vMSN.
-7. Compute sliding-window vMD from aligned myelin surfaces and individualized parcellations.
-8. Run GAM scripts on the resulting window-level or subject-level matrices.
+1. Use the [HFR_ai toolbox](https://github.com/MeilingAva/Homologous-Functional-Regions) to perform individualized functional parcellation, identify homologous ROIs, and compute functional connectivity from preprocessed functional MRI data.
+2. Compute pairwise vIFP from individualized matched ROI masks.
+3. Build age-sorted sliding-window vIFP summaries.
+4. Compute intra- and inter-subject vFC from HFR functional-connectivity matrices.
+5. Build individualized HFR structural-connectome matrices from tractography outputs.
+6. Compute sliding-window vSC from HFR structural-connectome matrices.
+7. Extract morphometric features, build MSN matrices, and compute sliding-window vMSN.
+8. Compute sliding-window vMD from aligned myelin surfaces and individualized parcellations.
+9. Run GAM scripts on the resulting window-level or subject-level matrices.
 
 ## Data Requirements
 
 This repository contains code only. Input data, intermediate matrices, and manuscript result outputs are not included.
 
-Expected inputs include:
+The manuscript used the **Human Connectome Project Development (HCP-D)** dataset as its discovery dataset. Access to HCP-D data requires an application and approval through the NIMH Data Archive (NDA), subject to the applicable data-use terms. See the official [HCP-D data-use terms and access guidance](https://www.humanconnectome.org/study/hcp-lifespan-development/data-use-terms).
 
-- HCP-D subject lists and demographic/covariate tables.
+Users can adapt the analysis scripts to their own datasets by supplying compatible inputs and configuring the paths, subject identifiers, file naming, ROI mappings, surface spaces, and model settings as needed. Subject lists and covariate tables should describe the user's own analysis cohort.
+
+Expected inputs depend on the analysis module and include:
+
+- Subject lists (one participant ID per line) and demographic/covariate tables for the selected cohort.
 - Individualized HFR ROI/parcellation files.
 - Pairwise or subject-level functional-connectivity matrices.
 - Individualized HFR structural-connectome matrices or the diffusion inputs needed to build them.
@@ -157,6 +170,7 @@ The full workflow uses a mixture of MATLAB, R, and neuroimaging command-line too
 
 Core requirements:
 
+- [HFR_ai toolbox](https://github.com/MeilingAva/Homologous-Functional-Regions) for upstream individualized parcellation and functional-connectivity estimation
 - MATLAB (tested with R2022b) and Statistics and Machine Learning Toolbox
 - R (tested with 4.4.1)
 - R packages: `R.matlab`, `mgcv`, `gratia`, `visreg`, `ggplot2`, `paletteer`, `scales`, `dplyr`, `pals`, `tidyr`
@@ -165,7 +179,7 @@ Core requirements:
 - ANTs
 - GNU parallel
 
-The repository-root `utils/` directory includes MATLAB helpers used by vMSN and vFC:
+The repository-root `utils/` directory includes MATLAB helpers used by vMSN, vSC, and vFC:
 
 - `utils/Fisherz.m`: the finite Fisher transformation used for MSN entries.
 - `utils/matcorr.m`: correlation between corresponding matrix columns.
