@@ -1,7 +1,8 @@
 clear; clc;
 
 ROIPath = '.../HFR_output/MatchRate1';
-SubIDs = textread('.../SubList.txt', '%s');
+sid_file = '.../SubList.txt';
+SubIDs = textread(sid_file, '%s');
 
 script_dir = fileparts(mfilename('fullpath'));
 vifp_root = fileparts(fileparts(script_dir));
@@ -72,11 +73,13 @@ for roi = 1:num_roi
 end
 elapsed_seconds = toc;
 
+measure = 'dice_overlap';
 save(fullfile(output_root, 'dice_overlap_results_new.mat'), ...
-    'dice_overlap_results', 'SubIDs', 'elapsed_seconds', '-v7.3');
+    'dice_overlap_results', 'SubIDs', 'elapsed_seconds', 'measure', '-v7.3');
 
+measure = 'vIFP_1_minus_dice_overlap';
 save(fullfile(output_root, 'cmp_dice_results_new.mat'), ...
-    'cmp_dice_results', 'SubIDs', 'elapsed_seconds', '-v7.3');
+    'cmp_dice_results', 'SubIDs', 'elapsed_seconds', 'measure', '-v7.3');
 
 % Legacy reproduction: matches the existing CmpDice/All_601/dice.mat.
 averages = dice_overlap_averages;

@@ -30,3 +30,9 @@ vSC/README.md
 vSC/docs/
 vFC/README.md
 vFC/docs/
+vMSN/README.md
+vMD/README.md
+
+# Local-only dependencies and tests
+/shared/
+/tests/

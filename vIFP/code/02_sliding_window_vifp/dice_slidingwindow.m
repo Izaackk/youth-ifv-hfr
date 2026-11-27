@@ -3,10 +3,12 @@ clear; clc;
 % Build primary win20/step10 sliding-window vIFP.
 % vIFP/cmpdice is defined as 1 - Dice overlap.
 
-result_root = '.../HFR_output/MatchRate1';
-load(fullfile(result_root, 'CmpDice', 'cmp_dice_results_new.mat'));
-dice_overlap_results = cmp_dice_results;
-vifp_results = 1 - dice_overlap_results;
+pairwise_file = '.../vIFP/outputs/CmpDice/cmp_dice_results_new.mat';
+info_file = '.../SubjectInfo.xlsx';
+Pairwise = load(pairwise_file);
+assert(isfield(Pairwise, 'measure') && strcmp(Pairwise.measure, 'vIFP_1_minus_dice_overlap'), ...
+    'Use the marked vIFP output from dice_HFR_group, not a legacy Dice-overlap file.');
+vifp_results = Pairwise.cmp_dice_results;
 
 num_sub = size(vifp_results, 1);
 for roi = 1:size(vifp_results, 3)
@@ -15,8 +17,10 @@ for roi = 1:size(vifp_results, 3)
     vifp_results(:, :, roi) = tmp;
 end
 
-SIDs = textread('.../HCPd_info/afterQC_sun.txt', '%s');
-Data_info = readtable('.../HCPd_info/Subinfo_HCPD_2.xlsx');
+SIDs = cellstr(string(Pairwise.SubIDs(:)));
+assert(numel(SIDs) == num_sub && numel(unique(SIDs)) == num_sub, ...
+    'The pairwise file must contain one unique subject ID per matrix row.');
+Data_info = readtable(info_file);
 
 Allsubs = Data_info.SubID;
 Allage = Data_info.Age;
@@ -38,6 +42,7 @@ end
 
 window_size = 20;
 step_size = 10;
+assert(num_sub >= window_size, 'The subject count is smaller than the window.');
 num_windows = floor((numel(age) - window_size) / step_size) + 1;
 num_roi = size(vifp_results, 3);
 
@@ -49,8 +54,6 @@ mFD_bins = zeros(num_windows, 1);
 sub_win_all = cell(num_windows, 1);
 
 lower_tri = tril(true(window_size), -1);
-lower_tri_3d = repmat(lower_tri, [1, 1, num_roi]);
-element_count = window_size * (window_size - 1) / 2;
 
 for nwin = 1:num_windows
     start_idx = (nwin - 1) * step_size + 1;
@@ -63,8 +66,8 @@ for nwin = 1:num_windows
     mFD_bins(nwin, 1) = mean(meanFD(I_win));
 
     vifp_win = vifp_results(I_win, I_win, :);
-    sums = sum(sum(vifp_win .* lower_tri_3d, 1), 2);
-    vifp_bins(nwin, :) = squeeze(sums / element_count);
+    pairs = reshape(vifp_win, window_size^2, num_roi);
+    vifp_bins(nwin, :) = mean(pairs(lower_tri(:), :), 1, 'omitnan');
 end
 
 dice_bins = vifp_bins;

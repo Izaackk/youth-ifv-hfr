@@ -2,10 +2,14 @@
 
 clear,clc;
 
+repo_root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+addpath(fullfile(repo_root, 'utils'));
+
 DataPath = '.../MatchRate1/FC_HFR_multi_sessions';
 PathOut = '.../MatchRate1/Variability_FC';
+sid_file = '.../sublist.txt';
 
-subs = textread(['.../sublist.txt'], '%s');
+subs = textread(sid_file, '%s');
 
 list_sess = {'surf1_AP', 'surf1_PA', 'surf2_AP', 'surf2_PA'};
 list_template = {'Atlas', 'Indi'};
@@ -48,7 +52,7 @@ for ntem = 1: 2
 %         for m = 1: numel(list_sess)
 %             for n = m + 1: numel(list_sess)
 %                 count = count + 1;
-%                 tmp = my_matcorr(squeeze(Rmat(m, :, :))', squeeze(Rmat(n, :, :))');
+%                 tmp = matcorr(squeeze(Rmat(m, :, :))', squeeze(Rmat(n, :, :))');
 %                 tmp(isnan(tmp)) = 0;
 %                 %             AveRmat = AveRmat + diag(tmp);
 %                 AveRmat = AveRmat + tmp';

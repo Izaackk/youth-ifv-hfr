@@ -1,4 +1,4 @@
-function C = my_matcorr(s_series, t_series)
+function C = matcorr(s_series, t_series)
 % Compute column-wise Pearson correlations between two equal-sized matrices.
 
 s_series = bsxfun(@minus, s_series, mean(s_series, 1));

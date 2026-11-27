@@ -1,89 +1,55 @@
-clc;
+clear; clc;
+
+% Compute age-sorted, ROI-wise structural-connectome variability.
+data_path = '.../HCPd_SC_HFR88indi_20260102';
+sid_file = '.../SubList.txt';
+info_file = '.../SubjectInfo.xlsx';
+out_root = '.../HFR_output/MatchRate1/SC_DWI_20260102/Inter_new';
+window_size = 20;
+step_size = 10;
+exclude_sids = {}; % Optional IDs to omit from the supplied subject list.
 
 script_dir = fileparts(mfilename('fullpath'));
 vsc_root = fileparts(fileparts(script_dir));
-repo_root = fileparts(vsc_root);
 addpath(fullfile(vsc_root, 'code', 'utils'));
 
-if ~exist('data_path', 'var')
-    data_path = '.../HCPd_SC_HFR88indi_20260102';
-end
-if ~exist('info_path', 'var')
-    info_path = '.../HCPd_info';
-end
-if ~exist('sid_file', 'var')
-    sid_file = fullfile(info_path, 'afterQC_sun_afterdMRI.txt');
-end
-if ~exist('out_root', 'var')
-    out_root = fullfile(repo_root, 'repro_outputs', 'vSC', 'SC_DWI_20260102', 'Inter_new');
-end
-if ~exist('window_size', 'var')
-    window_size = 20;
-end
-if ~exist('step_size', 'var')
-    step_size = 10;
-end
-if ~exist('out_file', 'var')
-    out_file = fullfile(out_root, sprintf('data_bin%d_step%d.mat', window_size, step_size));
-end
-
-if ~exist(out_root, 'dir')
-    mkdir(out_root);
-end
-
-if ~exist('exclude_sids', 'var')
-    exclude_sids = {};
-elseif ischar(exclude_sids)
-    exclude_sids = {exclude_sids};
-elseif isstring(exclude_sids)
-    exclude_sids = cellstr(exclude_sids);
-end
-
-SIDs = textread(sid_file, '%s');
-if ~isempty(exclude_sids)
-    keep_mask = ~ismember(SIDs, exclude_sids);
-    fprintf('Excluded %d subject(s) from %s\n', sum(~keep_mask), sid_file);
-    SIDs = SIDs(keep_mask);
-end
-SIDs_used = SIDs;
-data_info = readtable(fullfile(info_path, 'Subinfo_HCPD_2.xlsx'));
-
-allsubs = data_info.SubID;
-allage = data_info.Age;
-allsex = data_info.Sex;
-allmFD = data_info.meanFD;
+validateattributes(window_size, {'numeric'}, {'scalar', 'integer', 'finite', '>=', 2});
+validateattributes(step_size, {'numeric'}, {'scalar', 'integer', 'finite', 'positive'});
+SIDs = strtrim(string(splitlines(fileread(sid_file))));
+SIDs(SIDs == "" | ismember(SIDs, string(exclude_sids))) = [];
+assert(numel(unique(SIDs)) == numel(SIDs), 'Subject IDs must be unique.');
+SIDs_used = cellstr(SIDs);
+data_info = readtable(info_file, 'TextType', 'string');
 
 nsub = numel(SIDs);
-age = zeros(nsub, 1);
-sex = zeros(nsub, 1);
-mFD = zeros(nsub, 1);
-
-for i = 1:nsub
-    sub = SIDs{i};
-    idx = ismember(allsubs, sub);
-    age(i, 1) = allage(idx);
-    sex(i, 1) = allsex(idx);
-    mFD(i, 1) = allmFD(idx);
-end
+assert(nsub >= window_size, 'The subject count is smaller than the window.');
+table_ids = string(data_info.SubID);
+[found, index] = ismember(SIDs, table_ids);
+assert(all(found) && sum(ismember(table_ids, SIDs)) == nsub, ...
+    'Each selected subject must have exactly one row in the covariate table.');
+age = data_info.Age(index);
+sex = data_info.Sex(index);
+mFD = data_info.meanFD(index);
+assert(isnumeric(age) && isnumeric(sex) && isnumeric(mFD) && ...
+    all(isfinite([age; sex; mFD])), 'Age, Sex, and meanFD must be finite numeric values.');
 
 logi_87 = true(88, 1);
 logi_87(1) = false;
 
 SC_all = zeros(nsub, 87, 87);
 for i = 1:nsub
-    sub = SIDs{i};
+    sub = char(SIDs(i));
     sub_dir = fullfile(data_path, sub);
     mat_file = fullfile(sub_dir, [sub, '_HFR_88_indi_SC.mat']);
     csv_file = fullfile(sub_dir, [sub, '_HFR_88_indi_SC.csv']);
 
-    if exist(mat_file, 'file')
-        load(mat_file, 'SC');
-    elseif exist(csv_file, 'file')
-        SC = readmatrix(csv_file);
-        save(mat_file, 'SC');
+    if isfile(mat_file)
+        loaded = load(mat_file, 'SC');
+        SC = loaded.SC;
     else
-        error('SC file not found for %s', sub);
+        SC = readmatrix(csv_file);
     end
+    assert(isequal(size(SC), [88, 88]), 'Each input connectome must be 88 x 88.');
 
     SC(1:88+1:88^2) = 0;
     SC_all(i, :, :) = SC(logi_87, logi_87);
@@ -105,7 +71,7 @@ for nwin = 1:num_windows
     start_idx = (nwin - 1) * step_size + 1;
     end_idx = start_idx + window_size - 1;
     I_win = I(start_idx:end_idx);
-    sub_win_all(nwin, :) = reshape(SIDs(I_win), 1, []);
+    sub_win_all(nwin, :) = reshape(cellstr(SIDs(I_win)), 1, []);
 
     age_bins(nwin, 1) = mean(age(I_win));
     sex_bins(nwin, 1) = mean(sex(I_win));
@@ -118,7 +84,7 @@ for nwin = 1:num_windows
         SC_i = squeeze(SC_all(I_win(i), :, :));
         for j = i + 1:numel(I_win)
             SC_j = squeeze(SC_all(I_win(j), :, :));
-            tmp = my_matcorr(SC_i', SC_j');
+            tmp = matcorr(SC_i', SC_j');
             tmp(isnan(tmp)) = 0;
             ave_rmat = ave_rmat + tmp;
             count = count + 1;
@@ -130,9 +96,11 @@ for nwin = 1:num_windows
     wb_mean(nwin, 1) = mean(var_bins(nwin, :));
 end
 
+if ~isfolder(out_root), mkdir(out_root); end
+out_file = fullfile(out_root, sprintf('data_bin%d_step%d.mat', window_size, step_size));
 save(out_file, ...
     'var_bins', 'age_bins', 'sex_bins', 'mFD_bins', ...
     'wb_mean', 'window_size', 'step_size', ...
     'sub_win_all', 'SIDs_used', 'sid_file', 'exclude_sids', '-v7');
 
-fprintf('Saved Step 5 vSC data to %s\n', out_file);
+fprintf('Saved vSC: %d windows x 87 ROIs to %s\n', num_windows, out_file);
