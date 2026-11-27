@@ -44,10 +44,10 @@ for i = 1:numel(list_sess)
     path_save = fullfile(OutPath, ['session', num2str(i)]);
     mkdir(path_save);
 
-    save_mgh_HFR_fs5(InterSimilarity_session, fullfile(path_save, 'similarity_HFR87'));
+    mkdir(fullfile(path_save, 'similarity_HFR87'));
     save(fullfile(path_save, 'similarity_HFR87', 'InterSimilarity.mat'), 'InterSimilarity_session');
 
-    save_mgh_HFR_fs5(InterVariance_session, fullfile(path_save, 'intervariance_HFR87'));
+    mkdir(fullfile(path_save, 'intervariance_HFR87'));
     save(fullfile(path_save, 'intervariance_HFR87', 'InterVariance.mat'), 'InterVariance_session');
 
     Sim_allsession(i, :) = InterSimilarity_session;
@@ -58,10 +58,10 @@ end
 meanInterSimilarity = mean(Sim_allsession, 1);
 meanInterVariance   = mean(Var_allsession, 1);
 
-save_mgh_HFR_fs5(meanInterSimilarity, fullfile(OutPath, 'meanSimilarity_across4sess_HFR87'));
+mkdir(fullfile(OutPath, 'meanSimilarity_across4sess_HFR87'));
 save(fullfile(OutPath, 'meanSimilarity_across4sess_HFR87', 'meanInterSimilarity.mat'), 'meanInterSimilarity');
 
-save_mgh_HFR_fs5(meanInterVariance, fullfile(OutPath, 'meanInterVariance_across4sess_HFR87'));
+mkdir(fullfile(OutPath, 'meanInterVariance_across4sess_HFR87'));
 save(fullfile(OutPath, 'meanInterVariance_across4sess_HFR87', 'meanInterVariance.mat'), 'meanInterVariance');
 
 %% 
@@ -95,11 +95,11 @@ for i = 1:numel(list_sess)
     path_save = fullfile(OutPath, ['session', num2str(i)]);
 
     % 
-    save_mgh_HFR_fs5(Variability_norm(i, :), fullfile(path_save, 'intervariability_norm_HFR87'));
+    mkdir(fullfile(path_save, 'intervariability_norm_HFR87'));
     save(fullfile(path_save, 'intervariability_norm_HFR87', 'Variability_norm.mat'), 'Variability_norm');
 
     % 
-    save_mgh_HFR_fs5(Variability(i, :), fullfile(path_save, 'intervariability_HFR87'));
+    mkdir(fullfile(path_save, 'intervariability_HFR87'));
     save(fullfile(path_save, 'intervariability_HFR87', 'Variability.mat'), 'Variability');
 end
 
@@ -108,10 +108,10 @@ meanVariability_norm = mean(Variability_norm, 1);
 meanVariability = mean(Variability, 1);
 
 % 
-save_mgh_HFR_fs5(meanVariability_norm, fullfile(OutPath, 'InterVariability_norm_HFR87'));
+mkdir(fullfile(OutPath, 'InterVariability_norm_HFR87'));
 save(fullfile(OutPath, 'InterVariability_norm_HFR87', 'meanVariability_norm.mat'), 'meanVariability_norm', 'Variability_norm');
 
-save_mgh_HFR_fs5(meanVariability, fullfile(OutPath, 'InterVariability_HFR87'));
+mkdir(fullfile(OutPath, 'InterVariability_HFR87'));
 save(fullfile(OutPath, 'InterVariability_HFR87', 'meanVariability.mat'), 'meanVariability', 'Variability');
 
 fprintf('=== Sup_func_inter_var_HFR87 finished successfully ===\n');

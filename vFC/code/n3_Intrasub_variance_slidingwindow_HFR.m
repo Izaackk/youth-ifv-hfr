@@ -2,9 +2,6 @@
 
 clear,clc;
 
-repo_root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
-addpath(fullfile(repo_root, 'utils'));
-
 DataPath = '.../MatchRate1/FC_HFR_multi_sessions';
 PathOut = '.../MatchRate1/Variability_FC';
 sid_file = '.../sublist.txt';
@@ -61,16 +58,15 @@ for ntem = 1: 2
 %         count
 %         IntraVariance(s, :) = 1 - AveRmat./count;
 
-        path_save = [OutPath, '/', sub, '/'];
+        path_save = fullfile(OutPath, sub, 'intravariance_HFR87');
         mkdir(path_save)
 
-        save_mgh_HFR_fs5(IntraVariance(s, :), [path_save '/intravariance_HFR87'])
-
         intravariance = IntraVariance(s, :);
-        save([path_save '/intravariance_HFR87/intravariance_HFR87.mat'], 'intravariance')
+        save(fullfile(path_save, 'intravariance_HFR87.mat'), 'intravariance')
     end
     meanIntraVariance = mean(IntraVariance);
-    save_mgh_HFR_fs5(meanIntraVariance, [OutPath '/meanIntravariance_across4sess_HFR87'])
+    path_save = fullfile(OutPath, 'meanIntravariance_across4sess_HFR87');
+    mkdir(path_save)
 
-    save([OutPath '/meanIntravariance_across4sess_HFR87/meanIntravariance_across4sess_HFR87.mat'], 'meanIntraVariance')
+    save(fullfile(path_save, 'meanIntravariance_across4sess_HFR87.mat'), 'meanIntraVariance')
 end

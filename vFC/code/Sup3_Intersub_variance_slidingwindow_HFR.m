@@ -3,8 +3,7 @@
 clear; clc;
 
 script_dir = fileparts(mfilename('fullpath'));
-repo_root = fileparts(fileparts(script_dir));
-addpath(script_dir, fullfile(repo_root, 'utils'));
+addpath(script_dir);
 
 %%
 DataPath  = '.../MatchRate1/FC_HFR_multi_sessions';

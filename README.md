@@ -43,7 +43,6 @@ vMD/
 utils/
   Fisherz.m
   matcorr.m
-  save_mgh_HFR_fs5.m
 ```
 
 ## Analysis Modules
@@ -66,7 +65,7 @@ The separate `All_601/dice.mat` retains legacy Dice overlap; `All_601/vifp.mat` 
 
 `vFC/` contains scripts for within-subject and between-subject functional-connectivity variability based on HFR ROI-to-ROI functional-connectivity matrices. The scripts compute intra-subject variability across sessions and inter-subject variability within age-sorted sliding windows.
 
-Run the intra-subject script before the inter-subject script. Surface exports use the included `utils/save_mgh_HFR_fs5.m`; configure its `template_dir` and supply the authorized HFR87-to-116 mapping and fsaverage5 label surfaces. These templates are not distributed. An intra-subject age model uses one row per subject, not sliding-window averages; assembling its covariate table is a separate input-preparation step.
+Run the intra-subject script before the inter-subject script. The vFC scripts save ROI-wise numerical results as MAT files. Surface visualization requires a separate mapping and template matched to the dataset's HFR results and is left to the user. An intra-subject age model uses one row per subject, not sliding-window averages; assembling its covariate table is a separate input-preparation step.
 
 ### vSC
 
@@ -147,7 +146,7 @@ Expected inputs depend on the analysis module and include:
 - Surface or ROI-level measures used as GAM inputs.
 - Native HFR morphometric statistics for vMSN.
 - fsaverage4 myelin maps and a cortical vertex-index mask for vMD.
-- HFR label-conversion LUTs for structural-connectome construction and the matched-ROI mapping/label surfaces for vFC surface exports.
+- HFR label-conversion LUTs for structural-connectome construction.
 
 Because some source datasets are controlled-access or too large for GitHub, users should replace the placeholder paths with their own local data locations.
 
@@ -179,11 +178,10 @@ Core requirements:
 - ANTs
 - GNU parallel
 
-The repository-root `utils/` directory includes MATLAB helpers used by vMSN, vSC, and vFC:
+The repository-root `utils/` directory includes MATLAB helpers used by vMSN and vSC:
 
 - `utils/Fisherz.m`: the finite Fisher transformation used for MSN entries.
 - `utils/matcorr.m`: correlation between corresponding matrix columns.
-- `utils/save_mgh_HFR_fs5.m`: original matched-ROI mapping for vFC surface exports; requires user-supplied templates and FreeSurfer `load_mgh`/`save_mgh`.
 
 The vMSN and vMD main scripts read subject information directly and do not depend on `shared/`. Supply a text subject list and a covariate table with `SubID`, numeric `Age`, numeric `Sex`, and numeric `meanFD`; rows are matched to the subject-list order. Local tests and module-level README files are excluded from publication.
 
@@ -196,7 +194,7 @@ The GAM environment used for local checks includes `mgcv` 1.9-1, `gratia` 0.9.2,
 - vSC: all saved fields agree exactly before and after script cleanup for 582 subjects; the 57 x 87 window matrix and covariates match the archived reference exactly.
 - vMSN: 601 archived morphometric feature files reproduce the subject MSN matrices, the 59 x 87 variability matrix, and window covariates exactly. Current native statistics differ from the archived feature inputs for 596 subjects, so raw-statistics-to-manuscript reproduction is not established.
 - vMD: the 601-subject surface-input calculation reproduces the 59 x 87 ROI H matrix and window covariates exactly.
-- Local synthetic tests cover vIFP measure propagation, vFC calculations and surface export, and MATLAB/R input-output workflows. Tests and their generated inputs remain local-only.
+- Local synthetic tests cover vIFP measure propagation, vFC calculations and MAT outputs, and MATLAB/R input-output workflows. Tests and their generated inputs remain local-only.
 
 These checks do not establish a new reproduction of all manuscript GAM results or validate upstream preprocessing. No study data or private template is included in the repository.
 
