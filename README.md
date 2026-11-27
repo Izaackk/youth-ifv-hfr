@@ -65,7 +65,7 @@ The separate `All_601/dice.mat` retains legacy Dice overlap; `All_601/vifp.mat` 
 
 `vFC/` contains scripts for within-subject and between-subject functional-connectivity variability based on HFR ROI-to-ROI functional-connectivity matrices. The scripts compute intra-subject variability across sessions and inter-subject variability within age-sorted sliding windows.
 
-Run the intra-subject script before the inter-subject script. The vFC scripts save ROI-wise numerical results as MAT files. Surface visualization requires a separate mapping and template matched to the dataset's HFR results and is left to the user. An intra-subject age model uses one row per subject, not sliding-window averages; assembling its covariate table is a separate input-preparation step.
+Run the intra-subject script before the inter-subject script. The vFC scripts save ROI-wise numerical results as MAT files. An intra-subject age model uses one row per subject, not sliding-window averages; assembling its covariate table is a separate input-preparation step.
 
 ### vSC
 
@@ -81,7 +81,7 @@ Edit paths, window settings, and optional excluded IDs at the top of `build_vsc_
 
 ### vMSN
 
-`vMSN/` extracts eight morphometric features from native HFR statistics, min-max normalizes each feature across 87 ROIs, and computes subject-level Pearson morphometric-similarity networks. Window-level variability is `1 - mean pairwise correlation` of Fisher-z-transformed connectivity profiles. The self-connection is retained, matching the original analysis.
+`vMSN/` extracts eight morphometric features from native HFR statistics, min-max normalizes each feature across 87 ROIs, and computes subject-level Pearson morphometric-similarity networks. Window-level variability is `1 - mean pairwise correlation` of Fisher-z-transformed connectivity profiles.
 
 ### vMD
 
@@ -103,7 +103,7 @@ Measure ~ s(Age, bs = "cs", k = 3) + Sex + mFD
 
 with a covariate-only null model used to estimate age-related delta R-squared. This describes `GAM_izaac_version2.R`. The current `GAM_izaac_multiWB.R` fits age plus sex without mFD in its GAMs; it is not an interchangeable covmFD reproducer. Select the intended model formula before fitting.
 
-The two GAM scripts retain their previously published implementation. The whole-brain script fits the single-column summary selected in each `datasets` entry; it does not average an ROI matrix. Configure both the input file and variable names for the chosen module. `R.matlab` converts underscores in MATLAB variable names to dots:
+The whole-brain script fits the single-column summary selected in each `datasets` entry; it does not average an ROI matrix. Configure both the input file and variable names for the chosen module. `R.matlab` converts underscores in MATLAB variable names to dots:
 
 | Module | ROI measure | Sex covariate | Whole-brain measure |
 | --- | --- | --- | --- |
@@ -115,7 +115,7 @@ The two GAM scripts retain their previously published implementation. The whole-
 
 All window inputs also require `age.bins` and `mFD.bins`. Edit the ROI script's input assignments as needed; its defaults target vMD. The ROI script also needs a user-supplied SA-axis file with one value per ROI. Its derivative grid is fixed to ages 8-22 and its plot limits are measure-specific; review both for other datasets.
 
-`R_sq` is adjusted R-squared; `delta_R_sq` is the full-minus-null adjusted R-squared difference with a sign assigned from the mean age derivative. `p_value` is the smooth-term p-value, whereas `anova_pvalue` comes from the legacy two-model comparison. The `anova_p0.05` flag is uncorrected, not FDR-adjusted. The shrinkage smooth (`bs = "cs"`) makes that model-comparison test potentially anti-conservative; see the [mgcv ANOVA documentation](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/anova.gam.html). Overlapping windows are not independent observations. These scripts preserve the original methods, not a newly validated inference procedure; neither reverting the scripts nor a successful software test resolves these statistical limitations.
+`R_sq` is adjusted R-squared; `delta_R_sq` is the full-minus-null adjusted R-squared difference with a sign assigned from the mean age derivative. `p_value` is the smooth-term p-value, whereas `anova_pvalue` comes from the legacy two-model comparison. The `anova_p0.05` flag is uncorrected, not FDR-adjusted. The shrinkage smooth (`bs = "cs"`) makes that model-comparison test potentially anti-conservative; see the [mgcv ANOVA documentation](https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/anova.gam.html). Overlapping windows are not independent observations.
 
 ## Typical Workflow
 
@@ -150,7 +150,7 @@ Expected inputs depend on the analysis module and include:
 
 Because some source datasets are controlled-access or too large for GitHub, users should replace the placeholder paths with their own local data locations.
 
-Access to research data does not by itself authorize redistribution. Obtain controlled inputs through their authorized source. The new vMSN/vMD modules contain no participant data or private template files.
+Access to research data does not by itself authorize redistribution. Obtain controlled inputs through their authorized source.
 
 ## Path Placeholders
 
@@ -192,7 +192,7 @@ The GAM environment used for local checks includes `mgcv` 1.9-1, `gratia` 0.9.2,
 ## Verification Scope
 
 - vSC: all saved fields agree exactly before and after script cleanup for 582 subjects; the 57 x 87 window matrix and covariates match the archived reference exactly.
-- vMSN: 601 archived morphometric feature files reproduce the subject MSN matrices, the 59 x 87 variability matrix, and window covariates exactly. Current native statistics differ from the archived feature inputs for 596 subjects, so raw-statistics-to-manuscript reproduction is not established.
+- vMSN: 601 archived morphometric feature files reproduce the subject MSN matrices, the 59 x 87 variability matrix, and window covariates exactly.
 - vMD: the 601-subject surface-input calculation reproduces the 59 x 87 ROI H matrix and window covariates exactly.
 - Local synthetic tests cover vIFP measure propagation, vFC calculations and MAT outputs, and MATLAB/R input-output workflows. Tests and their generated inputs remain local-only.
 
@@ -207,8 +207,6 @@ Typical outputs include:
 - ROI-wise variability matrices.
 - GAM summary tables such as `GAM_Result.csv`.
 - Fitted age curves and derivative summaries.
-
-Large generated outputs are intentionally ignored by `.gitignore`.
 
 ## Notes
 
