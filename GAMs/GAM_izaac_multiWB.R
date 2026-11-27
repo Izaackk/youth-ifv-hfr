@@ -43,7 +43,11 @@ for (cfg in datasets) {
   Data$Sex <- as.numeric(data_all[[cfg$sex_var]])
   Data$mFD <- as.numeric(data_all$mFD.bins)
 
-  mod_gam <- gam(y ~ s(Age, bs = "cs", k = 3) + Sex,
+  # Use the same observations for the full, null, and linear models.
+  Data <- as.data.frame(Data)
+  Data <- Data[complete.cases(Data), , drop = FALSE]
+
+  mod_gam <- gam(y ~ s(Age, bs = "cs", k = 3) + Sex + mFD,
                  data = Data, method = "REML", na.action = "na.omit")
   gam_summ <- summary(mod_gam)
 
@@ -51,7 +55,7 @@ for (cfg in datasets) {
   F_value <- gam_summ$s.table[1, "F"]
   R_sq <- gam_summ$r.sq
 
-  gam_null <- gam(y ~ Sex, data = Data, method = "REML", na.action = "na.omit")
+  gam_null <- gam(y ~ Sex + mFD, data = Data, method = "REML", na.action = "na.omit")
   r2_null <- summary(gam_null)$r.sq
   delta_temp <- gam_summ$r.sq - r2_null
 

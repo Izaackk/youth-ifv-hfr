@@ -101,7 +101,7 @@ The main model form is:
 Measure ~ s(Age, bs = "cs", k = 3) + Sex + mFD
 ```
 
-with a covariate-only null model used to estimate age-related delta R-squared. This describes `GAM_izaac_version2.R`. The current `GAM_izaac_multiWB.R` fits age plus sex without mFD in its GAMs; it is not an interchangeable covmFD reproducer. Select the intended model formula before fitting.
+Both `GAM_izaac_version2.R` and `GAM_izaac_multiWB.R` adjust for sex and mean framewise displacement (mFD), using `Measure ~ Sex + mFD` as the covariate-only null model to estimate age-related delta R-squared. The whole-brain script fits its full, null, and linear models on the same rows with complete measure, age, sex, and mFD values. Its fitted age curves and confidence intervals come from the mFD-adjusted GAM. Earlier whole-brain outputs from sex-only GAMs need to be regenerated to include mFD adjustment.
 
 The whole-brain script fits the single-column summary selected in each `datasets` entry; it does not average an ROI matrix. Configure both the input file and variable names for the chosen module. `R.matlab` converts underscores in MATLAB variable names to dots:
 
@@ -187,7 +187,7 @@ The vMSN and vMD main scripts read subject information directly and do not depen
 
 vMD additionally needs MATLAB readers `gifti` and FreeSurfer `load_mgh` on the MATLAB path. Input surfaces must already be aligned; these modules do not perform native parcellation generation or surface resampling.
 
-The GAM environment used for local checks includes `mgcv` 1.9-1, `gratia` 0.9.2, and `visreg` 2.7.0. In that environment `gratia` warns that `term` in `derivatives()` is deprecated; the restored scripts have not been migrated to a different API.
+The GAM environment used for local checks includes `mgcv` 1.9-1, `gratia` 0.9.2, and `visreg` 2.7.0. In that environment `gratia` warns that `term` in `derivatives()` is deprecated; the scripts still use that API.
 
 ## Verification Scope
 
@@ -195,6 +195,7 @@ The GAM environment used for local checks includes `mgcv` 1.9-1, `gratia` 0.9.2,
 - vMSN: 601 archived morphometric feature files reproduce the subject MSN matrices, the 59 x 87 variability matrix, and window covariates exactly.
 - vMD: the 601-subject surface-input calculation reproduces the 59 x 87 ROI H matrix and window covariates exactly.
 - Local synthetic tests cover vIFP measure propagation, vFC calculations and MAT outputs, and MATLAB/R input-output workflows. Tests and their generated inputs remain local-only.
+- Whole-brain GAM synthetic checks cover sex/mFD adjustment, common complete-case samples, and exported fitted age curves.
 
 These checks do not establish a new reproduction of all manuscript GAM results or validate upstream preprocessing. No study data or private template is included in the repository.
 
